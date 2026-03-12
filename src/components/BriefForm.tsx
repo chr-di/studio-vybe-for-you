@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Dictionary, Locale } from '@/lib/i18n';
 
 interface BriefFormProps {
@@ -26,9 +26,7 @@ type BriefData = {
   // Step 2
   bio: string;
   credentials: string;
-  toneAdjective1: string;
-  toneAdjective2: string;
-  toneAdjective3: string;
+  toneOfVoice: string[]; // tag pills
   whyStarted: string;
   // Step 3
   siteGoals: string[];
@@ -42,7 +40,9 @@ type BriefData = {
   bookingSystem: string;
   bookingOther: string;
   newsletterPlatform: string;
-  brandColors: string;
+  brandColor1: string;
+  brandColor2: string;
+  brandColor3: string;
   hasLogo: string;
   hasPhotos: string;
   inspiration1Url: string;
@@ -204,6 +204,112 @@ function CheckboxGroup({ label, options, selected, onChange }: {
   );
 }
 
+// Tag pill input for tone-of-voice
+function TagPillInput({ label, hint, tags, onChange, placeholder, maxTags = 5 }: {
+  label: string; hint?: string; tags: string[]; onChange: (v: string[]) => void;
+  placeholder?: string; maxTags?: number;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const addTag = (raw: string) => {
+    const val = raw.trim().replace(/,/g, '');
+    if (val && !tags.includes(val) && tags.length < maxTags) {
+      onChange([...tags, val]);
+    }
+  };
+  return (
+    <div>
+      <label style={{ color: MUTED, display: 'block', fontFamily: 'var(--font-body)', fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '8px' }}>
+        {label}
+      </label>
+      {hint && <p style={{ color: MUTED, fontFamily: 'var(--font-body)', fontSize: '13px', marginBottom: '10px' }}>{hint}</p>}
+      <div
+        onClick={() => inputRef.current?.focus()}
+        style={{
+          border: `1px solid ${BORDER}`, padding: '8px 12px', display: 'flex',
+          flexWrap: 'wrap', gap: '8px', alignItems: 'center', cursor: 'text',
+          minHeight: '48px',
+        }}
+      >
+        {tags.map((tag, i) => (
+          <span key={i} style={{
+            display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 12px',
+            background: TEXT, color: BG, fontFamily: 'var(--font-body)', fontSize: '13px',
+          }}>
+            {tag}
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onChange(tags.filter((_, j) => j !== i)); }}
+              style={{ background: 'none', border: 'none', color: BG, cursor: 'pointer', fontSize: '16px', lineHeight: 1, opacity: 0.7, padding: 0 }}
+            >×</button>
+          </span>
+        ))}
+        {tags.length < maxTags && (
+          <input
+            ref={inputRef}
+            type="text"
+            placeholder={tags.length === 0 ? placeholder : undefined}
+            style={{ border: 'none', outline: 'none', flex: 1, minWidth: '120px', background: 'transparent', fontFamily: 'var(--font-body)', fontSize: '14px', color: TEXT, padding: '4px 0' }}
+            onKeyDown={(e) => {
+              if ((e.key === 'Enter' || e.key === ',') && e.currentTarget.value.trim()) {
+                e.preventDefault();
+                addTag(e.currentTarget.value);
+                e.currentTarget.value = '';
+              }
+            }}
+            onBlur={(e) => { if (e.target.value.trim()) { addTag(e.target.value); e.target.value = ''; } }}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Hex color inputs with live swatch previews
+function ColorSwatchInputs({ label, colors, onChange }: {
+  label: string;
+  colors: [string, string, string];
+  onChange: (idx: 0 | 1 | 2, val: string) => void;
+}) {
+  const isValidHex = (v: string) => /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(v);
+  const normalise = (v: string) => v && !v.startsWith('#') ? '#' + v : v;
+  return (
+    <div>
+      <label style={{ color: MUTED, display: 'block', fontFamily: 'var(--font-body)', fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '8px' }}>
+        {label}
+      </label>
+      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+        {([0, 1, 2] as const).map((idx) => {
+          const raw = colors[idx];
+          const norm = normalise(raw);
+          const valid = isValidHex(norm);
+          return (
+            <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <input
+                type="text"
+                value={raw}
+                maxLength={7}
+                placeholder="#EDEAE3"
+                onChange={(e) => onChange(idx, e.target.value)}
+                style={{
+                  background: 'transparent', border: `1px solid ${BORDER}`, color: TEXT,
+                  padding: '10px 12px', fontFamily: 'var(--font-body)', fontSize: '14px',
+                  outline: 'none', width: '110px',
+                }}
+              />
+              <div style={{
+                width: '36px', height: '36px', flexShrink: 0,
+                border: `1px solid ${BORDER}`,
+                background: valid ? norm : BG,
+                transition: 'background 0.15s ease',
+              }} />
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function SectionDivider({ title }: { title: string }) {
   return (
     <div style={{ borderTop: `1px solid ${BORDER}`, paddingTop: '32px', marginTop: '8px' }}>
@@ -229,12 +335,13 @@ export function BriefForm({ dict, locale }: BriefFormProps) {
     services: [{ name: '', description: '' }],
     pricingPublic: '', targetAudience: '', audiencePainPoints: '',
     bio: '', credentials: '',
-    toneAdjective1: '', toneAdjective2: '', toneAdjective3: '',
+    toneOfVoice: [],
     whyStarted: '',
     siteGoals: [], pages: [], languages: '', urgency: '',
     hasDomain: '', domainName: '', existingSite: '',
     bookingSystem: '', bookingOther: '', newsletterPlatform: '',
-    brandColors: '', hasLogo: '', hasPhotos: '',
+    brandColor1: '', brandColor2: '', brandColor3: '',
+    hasLogo: '', hasPhotos: '',
     inspiration1Url: '', inspiration1Why: '',
     inspiration2Url: '', inspiration2Why: '',
     inspiration3Url: '', inspiration3Why: '',
@@ -407,26 +514,13 @@ export function BriefForm({ dict, locale }: BriefFormProps) {
             <Textarea label={f.step2.bio} value={data.bio} onChange={(v) => set('bio', v)} placeholder={f.step2.bioPlaceholder} rows={5} hint={f.step2.bioHint} />
             <Textarea label={f.step2.credentials} value={data.credentials} onChange={(v) => set('credentials', v)} placeholder={f.step2.credentialsPlaceholder} rows={3} />
 
-            <div>
-              <label style={{ color: MUTED, display: 'block', fontFamily: 'var(--font-body)', fontSize: '12px', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '10px' }}>
-                {f.step2.toneLabel}
-              </label>
-              <p style={{ color: MUTED, fontFamily: 'var(--font-body)', fontSize: '13px', marginBottom: '10px' }}>{f.step2.toneHint}</p>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-                {(['toneAdjective1', 'toneAdjective2', 'toneAdjective3'] as const).map((key, i) => (
-                  <input
-                    key={key}
-                    type="text"
-                    value={data[key]}
-                    onChange={(e) => set(key, e.target.value)}
-                    placeholder={f.step2.tonePlaceholders[i]}
-                    style={{ background: 'transparent', border: `1px solid ${BORDER}`, color: TEXT, padding: '11px 13px', fontFamily: 'var(--font-body)', fontSize: '14px', outline: 'none' }}
-                    onFocus={(e) => (e.target.style.borderColor = TEXT)}
-                    onBlur={(e) => (e.target.style.borderColor = BORDER)}
-                  />
-                ))}
-              </div>
-            </div>
+            <TagPillInput
+              label={f.step2.toneLabel}
+              hint={f.step2.toneHint}
+              tags={data.toneOfVoice}
+              onChange={(v) => set('toneOfVoice', v)}
+              placeholder={f.step2.tonePlaceholder}
+            />
 
             <Textarea label={f.step2.whyStarted} value={data.whyStarted} onChange={(v) => set('whyStarted', v)} placeholder={f.step2.whyStartedPlaceholder} rows={4} hint={f.step2.whyStartedHint} />
           </div>
@@ -472,7 +566,15 @@ export function BriefForm({ dict, locale }: BriefFormProps) {
             <RadioCards label={f.step4.newsletterPlatform} options={f.step4.newsletterOptions} value={data.newsletterPlatform} onChange={(v) => set('newsletterPlatform', v)} />
 
             <SectionDivider title={f.step4.sectionBrand} />
-            <Input label={f.step4.brandColors} value={data.brandColors} onChange={(v) => set('brandColors', v)} placeholder={f.step4.brandColorsPlaceholder} />
+            <ColorSwatchInputs
+              label={f.step4.brandColors}
+              colors={[data.brandColor1, data.brandColor2, data.brandColor3]}
+              onChange={(idx, val) => {
+                if (idx === 0) set('brandColor1', val);
+                else if (idx === 1) set('brandColor2', val);
+                else set('brandColor3', val);
+              }}
+            />
             <RadioCards label={f.step4.hasLogo} options={f.step4.logoOptions} value={data.hasLogo} onChange={(v) => set('hasLogo', v)} />
             {data.hasLogo === 'yes' && (
               <p style={{ color: MUTED, fontFamily: 'var(--font-body)', fontSize: '14px', padding: '12px 16px', border: `1px solid ${BORDER}` }}>
