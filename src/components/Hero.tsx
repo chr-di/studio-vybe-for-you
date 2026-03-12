@@ -17,7 +17,7 @@ export function Hero({ dict, locale }: HeroProps) {
 
         <div className="mt-16 flex flex-col sm:flex-row gap-4">
           <a
-            href={'/' + locale + '/start'}
+            href={'/' + locale + '/apply'}
             className="inline-flex items-center justify-center px-8 py-4 text-lg font-medium bg-light text-dark hover:bg-cream transition-colors"
           >
             {dict.hero.cta.primary}
