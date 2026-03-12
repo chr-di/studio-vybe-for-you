@@ -7,8 +7,8 @@ interface PricingProps {
 
 export function Pricing({ dict }: PricingProps) {
   return (
-    <section id="pricing" className="bg-cream text-dark py-32 px-6 md:px-12 lg:px-24">
-      <div className="max-w-5xl mx-auto">
+    <section id="pricing" className="bg-cream text-dark py-32">
+      <div className="max-w-5xl mx-auto w-full px-6 md:px-8">
         <ScrollAnimation>
           <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-normal mb-4">
             {dict.pricing.title}

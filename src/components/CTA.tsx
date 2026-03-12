@@ -7,8 +7,8 @@ interface CTAProps {
 
 export function CTA({ dict }: CTAProps) {
   return (
-    <section id="contact" className="bg-cream text-dark py-32 px-6 md:px-12 lg:px-24">
-      <div className="max-w-3xl mx-auto text-center">
+    <section id="contact" className="bg-cream text-dark py-32">
+      <div className="max-w-3xl mx-auto w-full px-6 md:px-8 text-center">
         <ScrollAnimation>
           <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-normal mb-6">
             {dict.cta.title}
