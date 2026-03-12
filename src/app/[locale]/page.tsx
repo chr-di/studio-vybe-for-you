@@ -24,7 +24,7 @@ export default async function HomePage({ params }: PageProps) {
 
   return (
     <main>
-      <Hero dict={dict} />
+      <Hero dict={dict} locale={validLocale} />
       <Problem dict={dict} />
       <Paths dict={dict} />
       <HowItWorks dict={dict} />

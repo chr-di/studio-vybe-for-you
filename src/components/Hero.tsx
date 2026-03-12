@@ -2,9 +2,10 @@ import { Dictionary } from '@/lib/i18n';
 
 interface HeroProps {
   dict: Dictionary;
+  locale: string;
 }
 
-export function Hero({ dict }: HeroProps) {
+export function Hero({ dict, locale }: HeroProps) {
   return (
     <section className="min-h-screen flex flex-col justify-center py-32">
       <div className="max-w-5xl mx-auto w-full px-6 md:px-8">
@@ -16,7 +17,7 @@ export function Hero({ dict }: HeroProps) {
 
         <div className="mt-16 flex flex-col sm:flex-row gap-4">
           <a
-            href="#contact"
+            href={'/' + locale + '/start'}
             className="inline-flex items-center justify-center px-8 py-4 text-lg font-medium bg-light text-dark hover:bg-cream transition-colors"
           >
             {dict.hero.cta.primary}
