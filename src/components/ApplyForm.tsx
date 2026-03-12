@@ -140,6 +140,9 @@ export function ApplyForm({ dict, locale }: ApplyFormProps) {
           >
             {f.success.cta} <span>→</span>
           </a>
+          <p style={{ color: MUTED }} className="font-body text-sm mt-12">
+            {f.success.fallback}
+          </p>
         </div>
       </main>
     );

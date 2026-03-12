@@ -491,6 +491,7 @@ export const dictionaries = {
         heading: "Great — we'll be in touch within 24 hours.",
         body: 'Keep an eye on your inbox.',
         cta: 'Give us a head start — complete the full brief',
+        fallback: "Didn't hear from us? Email hello@studio-vybe.com",
       },
       validation: {
         required: 'This field is required',
@@ -1127,6 +1128,7 @@ export const dictionaries = {
         heading: 'Sehr gut — wir melden uns innerhalb von 24 Stunden.',
         body: 'Behalten Sie Ihren Posteingang im Auge.',
         cta: 'Geben Sie uns einen Vorsprung — füllen Sie das vollständige Briefing aus',
+        fallback: 'Nichts gehört? E-Mail an hello@studio-vybe.com',
       },
       validation: {
         required: 'Dieses Feld ist erforderlich',
