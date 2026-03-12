@@ -8,173 +8,137 @@ interface ApplyFormProps {
   locale: Locale;
 }
 
-interface FormData {
+type FormData = {
   name: string;
   email: string;
-  businessName: string;
   whatYouDo: string;
-  whoYouHelp: string;
-  mainCta: string;
+  siteGoal: string;
   vibe: string;
-  hasLogo: string;
-}
+  budget: string;
+};
+
+const VIBES = [
+  {
+    value: 'warm',
+    palette: ['#C8956C', '#E8D5C0', '#F5EDE3', '#8B5E3C'],
+    pattern: 'warm',
+  },
+  {
+    value: 'minimal',
+    palette: ['#E8E8E8', '#FFFFFF', '#C4C4C4', '#1A1A1A'],
+    pattern: 'minimal',
+  },
+  {
+    value: 'bold',
+    palette: ['#1A1A1A', '#D4A857', '#2C2C2C', '#F5F0E8'],
+    pattern: 'bold',
+  },
+  {
+    value: 'editorial',
+    palette: ['#D4C5BD', '#E8D8D0', '#B8A8A0', '#4A3C38'],
+    pattern: 'editorial',
+  },
+];
+
+const BG = '#EDEAE3';
+const TEXT = '#2D2A26';
+const MUTED = '#8A8178';
+const BORDER = '#C8C3BB';
+const ACCENT = '#2D2A26';
 
 export function ApplyForm({ dict, locale }: ApplyFormProps) {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const f = dict.apply;
+  const [step, setStep] = useState(1);
+  const [transitioning, setTransitioning] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const [formData, setFormData] = useState<FormData>({
+  const [data, setData] = useState<FormData>({
     name: '',
     email: '',
-    businessName: '',
     whatYouDo: '',
-    whoYouHelp: '',
-    mainCta: '',
+    siteGoal: '',
     vibe: '',
-    hasLogo: '',
+    budget: '',
   });
 
-  const totalSteps = 5;
-  const applyDict = dict.apply;
-  const formDict = dict.form;
+  const TOTAL = 5;
 
-  const validateEmail = (email: string) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
-  };
+  const set = (field: keyof FormData, value: string) =>
+    setData((d) => ({ ...d, [field]: value }));
 
-  const goToStep = useCallback((stepNum: number) => {
-    setIsTransitioning(true);
+  const transition = useCallback((to: number) => {
+    setTransitioning(true);
     setTimeout(() => {
-      setCurrentStep(stepNum);
-      setIsTransitioning(false);
-    }, 150);
+      setStep(to);
+      setTransitioning(false);
+    }, 200);
   }, []);
 
-  const goBack = useCallback(() => {
-    if (currentStep > 1) {
-      goToStep(currentStep - 1);
+  const validate = (): boolean => {
+    const e: Record<string, string> = {};
+    if (step === 1) {
+      if (!data.name.trim()) e.name = f.validation.required;
+      if (!data.email.trim()) e.email = f.validation.required;
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) e.email = f.validation.email;
     }
-  }, [currentStep, goToStep]);
+    if (step === 2 && !data.whatYouDo.trim()) e.whatYouDo = f.validation.required;
+    if (step === 3 && !data.siteGoal) e.siteGoal = f.validation.required;
+    if (step === 4 && !data.vibe) e.vibe = f.validation.required;
+    if (step === 5 && !data.budget) e.budget = f.validation.required;
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
 
-  const goNext = useCallback(() => {
-    setValidationErrors({});
+  const next = () => {
+    if (!validate()) return;
+    if (step < TOTAL) transition(step + 1);
+    else handleSubmit();
+  };
 
-    if (currentStep === 1) {
-      const errors: Record<string, string> = {};
-      if (!formData.name.trim()) {
-        errors.name = formDict.validation.required;
-      }
-      if (!formData.email.trim()) {
-        errors.email = formDict.validation.required;
-      } else if (!validateEmail(formData.email)) {
-        errors.email = formDict.validation.invalidEmail;
-      }
-      if (!formData.businessName.trim()) {
-        errors.businessName = formDict.validation.required;
-      }
-      if (!formData.whatYouDo.trim()) {
-        errors.whatYouDo = formDict.validation.required;
-      }
-      if (Object.keys(errors).length > 0) {
-        setValidationErrors(errors);
-        return;
-      }
-    }
-
-    if (currentStep === 2 && !formData.whoYouHelp.trim()) {
-      setValidationErrors({ whoYouHelp: formDict.validation.required });
-      return;
-    }
-
-    if (currentStep === 3 && !formData.mainCta) {
-      return;
-    }
-
-    if (currentStep === 4 && !formData.vibe) {
-      return;
-    }
-
-    if (currentStep === 5 && !formData.hasLogo) {
-      return;
-    }
-
-    if (currentStep < totalSteps) {
-      goToStep(currentStep + 1);
-    }
-  }, [currentStep, formData, formDict.validation, goToStep]);
+  const back = () => {
+    if (step > 1) transition(step - 1);
+  };
 
   const handleSubmit = async () => {
-    if (!formData.hasLogo) return;
-
-    setIsSubmitting(true);
-    setSubmitError(null);
-
-    const payload = {
-      name: formData.name,
-      email: formData.email,
-      business_name: formData.businessName,
-      what_you_do: formData.whatYouDo,
-      who_you_help: formData.whoYouHelp,
-      main_cta: formData.mainCta,
-      vibe: formData.vibe,
-      has_logo: formData.hasLogo,
-      locale,
-      form: 'apply',
-    };
-
+    if (!validate()) return;
+    setSubmitting(true);
+    setError(null);
     try {
-      const response = await fetch('https://n8n.dian.solutions/webhook/studio-vybe-intake', {
+      await fetch('https://n8n.dian.solutions/webhook/studio-vybe-intake', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...data, locale, form: 'apply' }),
       });
-
-      if (!response.ok) {
-        throw new Error('Submit failed');
-      }
-
-      setIsSuccess(true);
+      setSubmitted(true);
     } catch {
-      setSubmitError(formDict.error.submitFailed);
+      setError(f.error);
     } finally {
-      setIsSubmitting(false);
+      setSubmitting(false);
     }
   };
 
-  const updateField = <K extends keyof FormData>(key: K, value: FormData[K]) => {
-    setFormData(prev => ({ ...prev, [key]: value }));
-    if (validationErrors[key]) {
-      setValidationErrors(prev => {
-        const next = { ...prev };
-        delete next[key];
-        return next;
-      });
-    }
-  };
-
-  // Success state
-  if (isSuccess) {
+  if (submitted) {
     return (
-      <main className="min-h-screen bg-cream text-dark flex items-center justify-center px-6">
-        <div className="max-w-xl text-center">
-          <h1 className="font-display text-4xl md:text-5xl font-normal mb-6">
-            {applyDict.success.headline}
+      <main style={{ background: BG, color: TEXT }} className="min-h-screen flex items-center justify-center px-6">
+        <div className="max-w-lg w-full text-center py-24">
+          <p style={{ color: MUTED }} className="font-body text-sm tracking-widest uppercase mb-8">
+            {f.success.label}
+          </p>
+          <h1 className="font-display text-4xl md:text-5xl font-normal leading-tight mb-6">
+            {f.success.heading}
           </h1>
-          <p className="text-lg text-dark/70 mb-8">
-            {applyDict.success.subtext}
+          <p style={{ color: MUTED }} className="font-body text-lg mb-12">
+            {f.success.body}
           </p>
           <a
             href={`/${locale}/brief`}
-            className="text-accent hover:text-accent/80 transition-colors underline underline-offset-4"
+            style={{ background: TEXT, color: BG }}
+            className="inline-flex items-center gap-3 px-8 py-4 font-body font-medium text-base hover:opacity-90 transition-opacity"
           >
-            {applyDict.success.briefLink}
+            {f.success.cta} <span>→</span>
           </a>
         </div>
       </main>
@@ -182,256 +146,317 @@ export function ApplyForm({ dict, locale }: ApplyFormProps) {
   }
 
   return (
-    <main className="min-h-screen bg-cream text-dark">
-      {/* Progress dots */}
-      <div className="fixed top-8 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-        {Array.from({ length: totalSteps }).map((_, i) => (
-          <div
-            key={i}
-            className={`w-2 h-2 transition-colors duration-300 ${
-              i < currentStep ? 'bg-dark' : 'bg-dark/20'
-            }`}
-          />
-        ))}
+    <main style={{ background: BG, color: TEXT }} className="min-h-screen flex flex-col">
+      {/* Progress bar */}
+      <div style={{ borderBottom: `1px solid ${BORDER}` }} className="px-6 py-5 flex items-center gap-6">
+        <a
+          href={`/${locale}`}
+          style={{ color: MUTED }}
+          className="font-display text-sm tracking-wide hover:opacity-70 transition-opacity"
+        >
+          Studio Vybe
+        </a>
+        <div className="flex-1 flex gap-1.5 max-w-xs">
+          {Array.from({ length: TOTAL }).map((_, i) => (
+            <div
+              key={i}
+              style={{
+                background: i < step ? TEXT : BORDER,
+                height: '2px',
+                flex: 1,
+                transition: 'background 0.3s ease',
+              }}
+            />
+          ))}
+        </div>
+        <span style={{ color: MUTED }} className="font-body text-sm">
+          {step}/{TOTAL}
+        </span>
       </div>
 
-      {/* Back button */}
-      {currentStep > 1 && (
-        <button
-          onClick={goBack}
-          className="fixed top-8 left-6 text-dark/60 hover:text-dark transition-colors text-sm"
-        >
-          {formDict.back}
-        </button>
-      )}
+      {/* Step content */}
+      <div
+        className="flex-1 flex items-center justify-center px-6 py-16"
+        style={{
+          opacity: transitioning ? 0 : 1,
+          transform: transitioning ? 'translateY(8px)' : 'translateY(0)',
+          transition: 'opacity 0.2s ease, transform 0.2s ease',
+        }}
+      >
+        <div className="max-w-2xl w-full">
 
-      <div className="min-h-screen flex items-center justify-center px-6 py-24">
-        <div
-          className={`max-w-xl w-full transition-all duration-300 ease-out ${
-            isTransitioning ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'
-          }`}
-        >
-          {/* Step 1: Basic info */}
-          {currentStep === 1 && (
+          {/* Step 1: Name + email */}
+          {step === 1 && (
             <div>
+              <p style={{ color: MUTED }} className="font-body text-sm tracking-widest uppercase mb-4">
+                {f.step1.label}
+              </p>
               <h2 className="font-display text-3xl md:text-4xl font-normal mb-10">
-                {applyDict.step1.intro}
+                {f.step1.heading}
               </h2>
-              <div className="space-y-6">
+              <div className="flex flex-col gap-5">
                 <div>
-                  <label className="block text-sm mb-2">{applyDict.step1.nameLabel}</label>
                   <input
                     type="text"
-                    value={formData.name}
-                    onChange={(e) => updateField('name', e.target.value)}
-                    placeholder={applyDict.step1.namePlaceholder}
-                    className={`w-full px-4 py-3 bg-transparent border ${
-                      validationErrors.name ? 'border-red-500' : 'border-dark/20'
-                    } focus:border-accent outline-none transition-colors`}
+                    placeholder={f.step1.namePlaceholder}
+                    value={data.name}
+                    onChange={(e) => set('name', e.target.value)}
+                    style={{
+                      background: 'transparent',
+                      border: `1px solid ${errors.name ? '#B85C38' : BORDER}`,
+                      color: TEXT,
+                      width: '100%',
+                      padding: '14px 16px',
+                      fontFamily: 'inherit',
+                      fontSize: '16px',
+                      outline: 'none',
+                    }}
+                    onFocus={(e) => (e.target.style.borderColor = ACCENT)}
+                    onBlur={(e) => (e.target.style.borderColor = errors.name ? '#B85C38' : BORDER)}
                   />
-                  {validationErrors.name && (
-                    <p className="text-red-500 text-sm mt-1">{validationErrors.name}</p>
-                  )}
+                  {errors.name && <p style={{ color: '#B85C38' }} className="font-body text-sm mt-1">{errors.name}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm mb-2">{applyDict.step1.emailLabel}</label>
                   <input
                     type="email"
-                    value={formData.email}
-                    onChange={(e) => updateField('email', e.target.value)}
-                    placeholder={applyDict.step1.emailPlaceholder}
-                    className={`w-full px-4 py-3 bg-transparent border ${
-                      validationErrors.email ? 'border-red-500' : 'border-dark/20'
-                    } focus:border-accent outline-none transition-colors`}
+                    placeholder={f.step1.emailPlaceholder}
+                    value={data.email}
+                    onChange={(e) => set('email', e.target.value)}
+                    style={{
+                      background: 'transparent',
+                      border: `1px solid ${errors.email ? '#B85C38' : BORDER}`,
+                      color: TEXT,
+                      width: '100%',
+                      padding: '14px 16px',
+                      fontFamily: 'inherit',
+                      fontSize: '16px',
+                      outline: 'none',
+                    }}
+                    onFocus={(e) => (e.target.style.borderColor = ACCENT)}
+                    onBlur={(e) => (e.target.style.borderColor = errors.email ? '#B85C38' : BORDER)}
                   />
-                  {validationErrors.email && (
-                    <p className="text-red-500 text-sm mt-1">{validationErrors.email}</p>
-                  )}
+                  {errors.email && <p style={{ color: '#B85C38' }} className="font-body text-sm mt-1">{errors.email}</p>}
                 </div>
-                <div>
-                  <label className="block text-sm mb-2">{applyDict.step1.businessNameLabel}</label>
-                  <input
-                    type="text"
-                    value={formData.businessName}
-                    onChange={(e) => updateField('businessName', e.target.value)}
-                    placeholder={applyDict.step1.businessNamePlaceholder}
-                    className={`w-full px-4 py-3 bg-transparent border ${
-                      validationErrors.businessName ? 'border-red-500' : 'border-dark/20'
-                    } focus:border-accent outline-none transition-colors`}
-                  />
-                  {validationErrors.businessName && (
-                    <p className="text-red-500 text-sm mt-1">{validationErrors.businessName}</p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm mb-2">{applyDict.step1.whatYouDoLabel}</label>
-                  <input
-                    type="text"
-                    value={formData.whatYouDo}
-                    onChange={(e) => updateField('whatYouDo', e.target.value)}
-                    placeholder={applyDict.step1.whatYouDoPlaceholder}
-                    className={`w-full px-4 py-3 bg-transparent border ${
-                      validationErrors.whatYouDo ? 'border-red-500' : 'border-dark/20'
-                    } focus:border-accent outline-none transition-colors`}
-                  />
-                  {validationErrors.whatYouDo && (
-                    <p className="text-red-500 text-sm mt-1">{validationErrors.whatYouDo}</p>
-                  )}
-                </div>
-                <button
-                  onClick={goNext}
-                  className="mt-4 px-8 py-4 bg-dark text-light font-medium hover:bg-dark/90 transition-colors"
-                >
-                  {applyDict.step1.continue}
-                </button>
               </div>
             </div>
           )}
 
-          {/* Step 2: Who do you help? */}
-          {currentStep === 2 && (
+          {/* Step 2: What do you do */}
+          {step === 2 && (
             <div>
-              <h2 className="font-display text-3xl md:text-4xl font-normal mb-10">
-                {applyDict.step2.headline}
+              <p style={{ color: MUTED }} className="font-body text-sm tracking-widest uppercase mb-4">
+                {f.step2.label}
+              </p>
+              <h2 className="font-display text-3xl md:text-4xl font-normal mb-3">
+                {f.step2.heading}
               </h2>
-              <div className="space-y-6">
-                <input
-                  type="text"
-                  value={formData.whoYouHelp}
-                  onChange={(e) => updateField('whoYouHelp', e.target.value)}
-                  placeholder={applyDict.step2.placeholder}
-                  className={`w-full px-4 py-3 bg-transparent border ${
-                    validationErrors.whoYouHelp ? 'border-red-500' : 'border-dark/20'
-                  } focus:border-accent outline-none transition-colors`}
-                />
-                {validationErrors.whoYouHelp && (
-                  <p className="text-red-500 text-sm mt-1">{validationErrors.whoYouHelp}</p>
-                )}
-                <button
-                  onClick={goNext}
-                  className="mt-4 px-8 py-4 bg-dark text-light font-medium hover:bg-dark/90 transition-colors"
-                >
-                  {applyDict.step1.continue}
-                </button>
-              </div>
+              <p style={{ color: MUTED }} className="font-body text-base mb-10">
+                {f.step2.hint}
+              </p>
+              <textarea
+                placeholder={f.step2.placeholder}
+                value={data.whatYouDo}
+                onChange={(e) => set('whatYouDo', e.target.value)}
+                rows={3}
+                style={{
+                  background: 'transparent',
+                  border: `1px solid ${errors.whatYouDo ? '#B85C38' : BORDER}`,
+                  color: TEXT,
+                  width: '100%',
+                  padding: '14px 16px',
+                  fontFamily: 'inherit',
+                  fontSize: '16px',
+                  outline: 'none',
+                  resize: 'none',
+                }}
+                onFocus={(e) => (e.target.style.borderColor = ACCENT)}
+                onBlur={(e) => (e.target.style.borderColor = errors.whatYouDo ? '#B85C38' : BORDER)}
+              />
+              {errors.whatYouDo && <p style={{ color: '#B85C38' }} className="font-body text-sm mt-1">{errors.whatYouDo}</p>}
             </div>
           )}
 
-          {/* Step 3: Main CTA */}
-          {currentStep === 3 && (
+          {/* Step 3: Site goal */}
+          {step === 3 && (
             <div>
+              <p style={{ color: MUTED }} className="font-body text-sm tracking-widest uppercase mb-4">
+                {f.step3.label}
+              </p>
               <h2 className="font-display text-3xl md:text-4xl font-normal mb-10">
-                {applyDict.step3.headline}
+                {f.step3.heading}
               </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {f.step3.options.map((opt: { value: string; label: string }) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => set('siteGoal', opt.value)}
+                    style={{
+                      border: `1px solid ${data.siteGoal === opt.value ? TEXT : BORDER}`,
+                      background: data.siteGoal === opt.value ? TEXT : 'transparent',
+                      color: data.siteGoal === opt.value ? BG : TEXT,
+                      padding: '18px 20px',
+                      fontFamily: 'inherit',
+                      fontSize: '15px',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+              {errors.siteGoal && <p style={{ color: '#B85C38' }} className="font-body text-sm mt-3">{errors.siteGoal}</p>}
+            </div>
+          )}
+
+          {/* Step 4: Vibe */}
+          {step === 4 && (
+            <div>
+              <p style={{ color: MUTED }} className="font-body text-sm tracking-widest uppercase mb-4">
+                {f.step4.label}
+              </p>
+              <h2 className="font-display text-3xl md:text-4xl font-normal mb-3">
+                {f.step4.heading}
+              </h2>
+              <p style={{ color: MUTED }} className="font-body text-base mb-10">
+                {f.step4.hint}
+              </p>
               <div className="grid grid-cols-2 gap-4">
-                {[
-                  { value: 'bookCall', label: applyDict.step3.options.bookCall },
-                  { value: 'buyCourse', label: applyDict.step3.options.buyCourse },
-                  { value: 'joinList', label: applyDict.step3.options.joinList },
-                  { value: 'getQuote', label: applyDict.step3.options.getQuote },
-                ].map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => {
-                      updateField('mainCta', option.value);
-                      setTimeout(() => goToStep(4), 200);
-                    }}
-                    className={`p-6 border text-center transition-colors ${
-                      formData.mainCta === option.value
-                        ? 'border-accent bg-accent/10'
-                        : 'border-dark/20 hover:border-dark/40'
-                    }`}
-                  >
-                    <span className="font-medium">{option.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Step 4: Pick a vibe */}
-          {currentStep === 4 && (
-            <div>
-              <h2 className="font-display text-3xl md:text-4xl font-normal mb-10">
-                {applyDict.step4.headline}
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {[
-                  { value: 'warm', label: applyDict.step4.vibes.warm.label, desc: applyDict.step4.vibes.warm.desc },
-                  { value: 'minimal', label: applyDict.step4.vibes.minimal.label, desc: applyDict.step4.vibes.minimal.desc },
-                  { value: 'bold', label: applyDict.step4.vibes.bold.label, desc: applyDict.step4.vibes.bold.desc },
-                  { value: 'editorial', label: applyDict.step4.vibes.editorial.label, desc: applyDict.step4.vibes.editorial.desc },
-                ].map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => {
-                      updateField('vibe', option.value);
-                      setTimeout(() => goToStep(5), 200);
-                    }}
-                    className={`p-6 border text-left transition-colors ${
-                      formData.vibe === option.value
-                        ? 'border-accent bg-accent/10'
-                        : 'border-dark/20 hover:border-dark/40'
-                    }`}
-                  >
-                    <span className="font-medium block mb-1">{option.label}</span>
-                    <span className="text-muted text-sm">{option.desc}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Step 5: Do you have a logo? */}
-          {currentStep === 5 && (
-            <div>
-              <h2 className="font-display text-3xl md:text-4xl font-normal mb-10">
-                {applyDict.step5.headline}
-              </h2>
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  {[
-                    { value: 'yes', label: applyDict.step5.yes },
-                    { value: 'notYet', label: applyDict.step5.notYet },
-                  ].map((option) => (
+                {VIBES.map((vibe) => {
+                  const label = f.step4.vibes[vibe.value as keyof typeof f.step4.vibes];
+                  const selected = data.vibe === vibe.value;
+                  return (
                     <button
-                      key={option.value}
-                      onClick={() => updateField('hasLogo', option.value)}
-                      className={`p-6 border text-center transition-colors ${
-                        formData.hasLogo === option.value
-                          ? 'border-accent bg-accent/10'
-                          : 'border-dark/20 hover:border-dark/40'
-                      }`}
+                      key={vibe.value}
+                      onClick={() => set('vibe', vibe.value)}
+                      style={{
+                        border: `2px solid ${selected ? TEXT : BORDER}`,
+                        background: 'transparent',
+                        cursor: 'pointer',
+                        padding: 0,
+                        overflow: 'hidden',
+                        transition: 'border-color 0.15s ease',
+                      }}
                     >
-                      <span className="font-medium">{option.label}</span>
+                      {/* Moodboard palette swatch */}
+                      <div style={{ height: '120px', display: 'flex' }}>
+                        {vibe.palette.map((color, i) => (
+                          <div
+                            key={i}
+                            style={{
+                              flex: 1,
+                              background: color,
+                              position: 'relative',
+                            }}
+                          >
+                            {/* Texture overlay for visual depth */}
+                            {vibe.pattern === 'warm' && i === 2 && (
+                              <div style={{
+                                position: 'absolute', inset: 0,
+                                backgroundImage: 'radial-gradient(circle at 30% 50%, rgba(200,149,108,0.3) 0%, transparent 70%)',
+                              }} />
+                            )}
+                            {vibe.pattern === 'editorial' && i === 1 && (
+                              <div style={{
+                                position: 'absolute', inset: 0,
+                                backgroundImage: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 60%)',
+                              }} />
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      {/* Label */}
+                      <div
+                        style={{
+                          padding: '14px 16px',
+                          textAlign: 'left',
+                          borderTop: `1px solid ${selected ? TEXT : BORDER}`,
+                          background: selected ? TEXT : BG,
+                          color: selected ? BG : TEXT,
+                          transition: 'all 0.15s ease',
+                        }}
+                      >
+                        <p style={{ fontFamily: 'var(--font-display)', fontSize: '15px', fontWeight: 400, margin: 0 }}>
+                          {label.title}
+                        </p>
+                        <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', opacity: 0.7, margin: '4px 0 0' }}>
+                          {label.desc}
+                        </p>
+                      </div>
                     </button>
-                  ))}
-                </div>
-
-                {formData.hasLogo === 'yes' && (
-                  <p className="text-sm text-muted mt-4 p-4 border border-dark/10 bg-dark/5">
-                    {applyDict.step5.uploadNote}
-                  </p>
-                )}
-
-                {submitError && (
-                  <div className="p-4 border border-red-500 bg-red-50 text-red-700">
-                    {submitError}
-                  </div>
-                )}
-
-                {formData.hasLogo && (
-                  <button
-                    onClick={handleSubmit}
-                    disabled={isSubmitting}
-                    className="w-full mt-6 px-8 py-4 bg-dark text-light font-medium hover:bg-dark/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isSubmitting ? '...' : applyDict.submit}
-                  </button>
-                )}
+                  );
+                })}
               </div>
+              {errors.vibe && <p style={{ color: '#B85C38' }} className="font-body text-sm mt-3">{errors.vibe}</p>}
             </div>
           )}
+
+          {/* Step 5: Budget */}
+          {step === 5 && (
+            <div>
+              <p style={{ color: MUTED }} className="font-body text-sm tracking-widest uppercase mb-4">
+                {f.step5.label}
+              </p>
+              <h2 className="font-display text-3xl md:text-4xl font-normal mb-10">
+                {f.step5.heading}
+              </h2>
+              <div className="flex flex-col gap-3">
+                {f.step5.options.map((opt: { value: string; label: string }) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => set('budget', opt.value)}
+                    style={{
+                      border: `1px solid ${data.budget === opt.value ? TEXT : BORDER}`,
+                      background: data.budget === opt.value ? TEXT : 'transparent',
+                      color: data.budget === opt.value ? BG : TEXT,
+                      padding: '18px 24px',
+                      fontFamily: 'inherit',
+                      fontSize: '16px',
+                      textAlign: 'left',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+              {errors.budget && <p style={{ color: '#B85C38' }} className="font-body text-sm mt-3">{errors.budget}</p>}
+              {error && <p style={{ color: '#B85C38' }} className="font-body text-sm mt-4">{error}</p>}
+            </div>
+          )}
+
+          {/* Nav buttons */}
+          <div className="mt-12 flex items-center gap-6">
+            {step > 1 && (
+              <button
+                onClick={back}
+                style={{ color: MUTED, fontFamily: 'inherit', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: '15px' }}
+                className="hover:opacity-70 transition-opacity"
+              >
+                ← {f.back}
+              </button>
+            )}
+            <button
+              onClick={next}
+              disabled={submitting}
+              style={{
+                background: TEXT,
+                color: BG,
+                border: 'none',
+                padding: '16px 36px',
+                fontFamily: 'inherit',
+                fontSize: '16px',
+                fontWeight: 500,
+                cursor: submitting ? 'not-allowed' : 'pointer',
+                opacity: submitting ? 0.7 : 1,
+                transition: 'opacity 0.15s ease',
+              }}
+            >
+              {step === TOTAL ? (submitting ? f.submitting : f.submit) : f.next}
+            </button>
+          </div>
         </div>
       </div>
     </main>
