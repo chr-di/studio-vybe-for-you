@@ -541,9 +541,9 @@ export const dictionaries = {
         toneLabel: 'Tone of voice',
         toneHint: 'Three adjectives that describe how you want to sound.',
         tonePlaceholders: ['warm', 'direct', 'human'],
-        whyStarted: 'Why you started this',
-        whyStartedPlaceholder: 'The human story behind your business',
-        whyStartedHint: 'Often the most powerful part of an About page.',
+        whyStarted: 'Why did you start this?',
+        whyStartedPlaceholder: 'Tell us in 2–3 sentences — this is often the most powerful part of an About page.',
+        whyStartedHint: 'No need to be polished. Real is better.',
       },
       step3: {
         label: 'Step 3 of 4',
@@ -632,6 +632,7 @@ export const dictionaries = {
         inspirationWhy: 'What do you love about it?',
         sectionCopy: 'Copy',
         copyStatus: 'Do you have copy (text) ready?',
+        copyHint: "Don't have copy yet? No problem — we'll help you write it.",
         copyOptions: [
           { value: 'ready', label: 'I have it ready' },
           { value: 'need-written', label: 'I need it written' },
@@ -1176,9 +1177,9 @@ export const dictionaries = {
         toneLabel: 'Tonalität',
         toneHint: 'Drei Adjektive, die beschreiben, wie Sie klingen möchten.',
         tonePlaceholders: ['warm', 'direkt', 'menschlich'],
-        whyStarted: 'Warum Sie das angefangen haben',
-        whyStartedPlaceholder: 'Die menschliche Geschichte hinter Ihrem Unternehmen',
-        whyStartedHint: 'Oft der wirkungsvollste Teil einer Über-mich-Seite.',
+        whyStarted: 'Warum haben Sie das angefangen?',
+        whyStartedPlaceholder: 'Erzählen Sie uns in 2–3 Sätzen — das ist oft der wirkungsvollste Teil einer Über-mich-Seite.',
+        whyStartedHint: 'Kein Perfektionismus nötig. Authentisch ist besser.',
       },
       step3: {
         label: 'Schritt 3 von 4',
@@ -1267,6 +1268,7 @@ export const dictionaries = {
         inspirationWhy: 'Was gefällt Ihnen daran?',
         sectionCopy: 'Texte',
         copyStatus: 'Haben Sie Texte (Copy) bereit?',
+        copyHint: 'Noch keine Texte? Kein Problem — wir helfen Ihnen dabei.',
         copyOptions: [
           { value: 'ready', label: 'Ja, alles bereit' },
           { value: 'need-written', label: 'Nein, brauche Hilfe' },

@@ -508,6 +508,7 @@ export function BriefForm({ dict, locale }: BriefFormProps) {
 
             <SectionDivider title={f.step4.sectionCopy} />
             <RadioCards label={f.step4.copyStatus} options={f.step4.copyOptions} value={data.copyStatus} onChange={(v) => set('copyStatus', v)} />
+            <p style={{ color: MUTED, fontFamily: 'var(--font-body)', fontSize: '13px', marginTop: '-16px' }}>{f.step4.copyHint}</p>
 
             <SectionDivider title={f.step4.sectionContact} />
             <Input label={f.step4.name} value={data.name} onChange={(v) => set('name', v)} />
