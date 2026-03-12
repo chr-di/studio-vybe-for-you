@@ -8,7 +8,7 @@ interface TrustProps {
 export function Trust({ dict }: TrustProps) {
   return (
     <section className="py-32 px-6 md:px-12 lg:px-24">
-      <div className="max-w-5xl">
+      <div className="max-w-5xl mx-auto">
         <ScrollAnimation>
           <p className="font-display text-3xl md:text-4xl lg:text-5xl font-normal text-light/60 text-center leading-snug">
             {dict.trust.headline}

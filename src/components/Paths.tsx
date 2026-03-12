@@ -8,7 +8,7 @@ interface PathsProps {
 export function Paths({ dict }: PathsProps) {
   return (
     <section className="py-32 px-6 md:px-12 lg:px-24">
-      <div className="max-w-5xl">
+      <div className="max-w-5xl mx-auto">
         <ScrollAnimation>
           <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-normal mb-20">
             {dict.paths.title}

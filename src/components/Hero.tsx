@@ -7,7 +7,7 @@ interface HeroProps {
 export function Hero({ dict }: HeroProps) {
   return (
     <section className="min-h-screen flex flex-col justify-center px-6 md:px-12 lg:px-24 py-32">
-      <div className="max-w-5xl">
+      <div className="max-w-5xl mx-auto">
         <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-normal leading-[1.1] tracking-tight">
           {dict.hero.headline}
           <br />

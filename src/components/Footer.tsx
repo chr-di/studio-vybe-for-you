@@ -19,7 +19,7 @@ export function Footer({ dict, currentLocale }: FooterProps) {
 
   return (
     <footer className="py-16 px-6 md:px-12 lg:px-24 border-t border-light/10">
-      <div className="max-w-5xl">
+      <div className="max-w-5xl mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
           <div className="flex flex-col sm:flex-row gap-6 sm:gap-12 text-sm text-light/60">
             <a href="/impressum" className="hover:text-light transition-colors">
