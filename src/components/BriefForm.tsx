@@ -380,7 +380,7 @@ export function BriefForm({ dict, locale }: BriefFormProps) {
     setSubmitting(true);
     setError(null);
     try {
-      await fetch('https://n8n.dian.solutions/webhook/studio-vybe-intake', {
+      await fetch('/api/intake', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...data, locale, form: 'brief' }),

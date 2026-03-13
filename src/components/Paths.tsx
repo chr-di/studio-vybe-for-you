@@ -30,7 +30,7 @@ export function Paths({ dict }: PathsProps) {
     setSubmitting(true);
     setError('');
     try {
-      await fetch('https://n8n.dian.solutions/webhook/studio-vybe-intake', {
+      await fetch('/api/intake', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, source: 'diy-waitlist' }),
