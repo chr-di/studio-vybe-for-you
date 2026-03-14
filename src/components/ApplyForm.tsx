@@ -134,7 +134,7 @@ export function ApplyForm({ dict, locale }: ApplyFormProps) {
             {f.success.body}
           </p>
           <a
-            href={`/${locale}/brief`}
+            href={`/${locale}/brief?name=${encodeURIComponent(data.name)}&email=${encodeURIComponent(data.email)}`}
             style={{ background: TEXT, color: BG }}
             className="inline-flex items-center gap-3 px-8 py-4 font-body font-medium text-base hover:opacity-90 transition-opacity"
           >

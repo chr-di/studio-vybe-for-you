@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Dictionary, Locale } from '@/lib/i18n';
 
 interface BriefFormProps {
@@ -327,6 +327,8 @@ export function BriefForm({ dict, locale }: BriefFormProps) {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Track which fields arrived pre-filled from URL params
+  const [prefilledFields, setPrefilledFields] = useState<Set<string>>(new Set());
 
   const TOTAL = 4;
 
@@ -351,6 +353,24 @@ export function BriefForm({ dict, locale }: BriefFormProps) {
 
   const set = <K extends keyof BriefData>(field: K, value: BriefData[K]) =>
     setData((d) => ({ ...d, [field]: value }));
+
+  // Prefill name + email from URL params on mount (e.g. coming from apply form or email CTA)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlName = params.get('name');
+    const urlEmail = params.get('email');
+    if (urlName || urlEmail) {
+      setData((d) => ({
+        ...d,
+        ...(urlName ? { name: urlName } : {}),
+        ...(urlEmail ? { email: urlEmail } : {}),
+      }));
+      const prefilled = new Set<string>();
+      if (urlName) prefilled.add('name');
+      if (urlEmail) prefilled.add('email');
+      setPrefilledFields(prefilled);
+    }
+  }, []);
 
   const transition = useCallback((to: number) => {
     setTransitioning(true);
@@ -613,6 +633,11 @@ export function BriefForm({ dict, locale }: BriefFormProps) {
             <p style={{ color: MUTED, fontFamily: 'var(--font-body)', fontSize: '13px', marginTop: '-16px' }}>{f.step4.copyHint}</p>
 
             <SectionDivider title={f.step4.sectionContact} />
+            {prefilledFields.size > 0 && (
+              <p style={{ color: MUTED, fontFamily: 'var(--font-body)', fontSize: '13px', padding: '10px 14px', border: `1px solid ${BORDER}`, marginBottom: '-8px' }}>
+                {f.step4.prefilledNote ?? 'Your details were carried over — update them if needed.'}
+              </p>
+            )}
             <Input label={f.step4.name} value={data.name} onChange={(v) => set('name', v)} />
             <Input label={f.step4.email} value={data.email} onChange={(v) => set('email', v)} type="email" />
             <Textarea label={f.step4.anythingElse} value={data.anythingElse} onChange={(v) => set('anythingElse', v)} rows={3} />
