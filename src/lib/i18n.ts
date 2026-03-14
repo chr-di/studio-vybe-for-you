@@ -658,6 +658,14 @@ export const dictionaries = {
         anythingElse: 'Anything else?',
       },
     },
+    thankYou: {
+      brief: {
+        label: 'Brief received',
+        heading: 'Your brief is in.',
+        body: "We'll review everything you've shared and be in touch within a few days. No need to follow up — we've got it.",
+        sub: 'In the meantime, feel free to explore our work or reach out if anything changes.',
+      },
+    },
   
   },
   de: {
@@ -1306,6 +1314,14 @@ export const dictionaries = {
         name: 'Name',
         email: 'E-Mail',
         anythingElse: 'Sonst noch etwas?',
+      },
+    },
+    thankYou: {
+      brief: {
+        label: 'Briefing erhalten',
+        heading: 'Ihr Briefing ist eingegangen.',
+        body: 'Wir werden alles durchgehen und uns in den nächsten Tagen bei Ihnen melden. Sie müssen sich nicht melden — wir kümmern uns darum.',
+        sub: 'In der Zwischenzeit können Sie gerne unsere Arbeiten anschauen oder uns kontaktieren, falls sich etwas ändert.',
       },
     },
   

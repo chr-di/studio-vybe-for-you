@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Dictionary, Locale } from '@/lib/i18n';
 
 interface BriefFormProps {
@@ -322,9 +323,9 @@ function SectionDivider({ title }: { title: string }) {
 
 export function BriefForm({ dict, locale }: BriefFormProps) {
   const f = dict.brief;
+  const router = useRouter();
   const [step, setStep] = useState(1);
   const [transitioning, setTransitioning] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Track which fields arrived pre-filled from URL params
@@ -400,36 +401,18 @@ export function BriefForm({ dict, locale }: BriefFormProps) {
     setSubmitting(true);
     setError(null);
     try {
-      await fetch('/api/intake', {
+      const res = await fetch('/api/intake', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...data, locale, form: 'brief' }),
       });
-      setSubmitted(true);
+      if (!res.ok) throw new Error('Request failed');
+      router.push(`/${locale}/thank-you/brief`);
     } catch {
       setError(f.error);
-    } finally {
       setSubmitting(false);
     }
   };
-
-  if (submitted) {
-    return (
-      <main style={{ background: BG, color: TEXT }} className="min-h-screen flex items-center justify-center px-6">
-        <div className="max-w-lg w-full text-center py-24">
-          <p style={{ color: MUTED }} className="font-body text-sm tracking-widest uppercase mb-8">
-            {f.success.label}
-          </p>
-          <h1 className="font-display text-4xl md:text-5xl font-normal leading-tight mb-6">
-            {f.success.heading}
-          </h1>
-          <p style={{ color: MUTED }} className="font-body text-lg">
-            {f.success.body}
-          </p>
-        </div>
-      </main>
-    );
-  }
 
   return (
     <main style={{ background: BG, color: TEXT }} className="min-h-screen">
