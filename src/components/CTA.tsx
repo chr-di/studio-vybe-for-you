@@ -30,9 +30,22 @@ export function CTA({ dict, locale = 'en' }: CTAProps) {
             <button
               onClick={() => setBookingOpen(true)}
               style={{ border: `1px solid ${BORDER}`, color: TEXT }}
-              className="inline-flex items-center justify-center px-10 py-5 text-lg font-medium hover:opacity-70 transition-opacity bg-transparent"
+              className="group inline-flex items-center gap-4 px-10 py-5 text-lg font-medium bg-transparent transition-opacity hover:opacity-70"
             >
-              {dict.cta.button}
+              <span>{dict.cta.button}</span>
+              <span className="flex items-center overflow-hidden">
+                <svg
+                  width="20"
+                  height="12"
+                  viewBox="0 0 20 12"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="translate-x-0 transition-transform duration-300 ease-out group-hover:translate-x-1"
+                  aria-hidden="true"
+                >
+                  <path d="M0 6H18M18 6L13 1M18 6L13 11" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </span>
             </button>
           </ScrollAnimation>
         </div>
