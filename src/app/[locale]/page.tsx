@@ -31,7 +31,7 @@ export default async function HomePage({ params }: PageProps) {
       <Features dict={dict} />
       <Pricing dict={dict} />
       <Trust dict={dict} />
-      <CTA dict={dict} />
+      <CTA dict={dict} locale={validLocale} />
       <Footer dict={dict} currentLocale={validLocale} />
     </main>
   );
