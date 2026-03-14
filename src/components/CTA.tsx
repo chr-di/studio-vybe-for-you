@@ -32,7 +32,7 @@ export function CTA({ dict, locale = 'en' }: CTAProps) {
               style={{ border: `1px solid ${BORDER}`, color: TEXT }}
               className="inline-flex items-center justify-center px-10 py-5 text-lg font-medium hover:opacity-70 transition-opacity bg-transparent"
             >
-              {dict.cta.button} ———→
+              {dict.cta.button}
             </button>
           </ScrollAnimation>
         </div>
