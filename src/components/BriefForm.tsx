@@ -635,7 +635,7 @@ export function BriefForm({ dict, locale }: BriefFormProps) {
             <SectionDivider title={f.step4.sectionContact} />
             {prefilledFields.size > 0 && (
               <p style={{ color: MUTED, fontFamily: 'var(--font-body)', fontSize: '13px', padding: '10px 14px', border: `1px solid ${BORDER}`, marginBottom: '-8px' }}>
-                {f.step4.prefilledNote ?? 'Your details were carried over — update them if needed.'}
+                {'Your details were carried over — update them if needed.'}
               </p>
             )}
             <Input label={f.step4.name} value={data.name} onChange={(v) => set('name', v)} />
