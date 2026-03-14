@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const N8N_WEBHOOK = 'https://n8n.dian.solutions/webhook/studio-vybe-intake';
+const N8N_WEBHOOK =
+  process.env.N8N_WEBHOOK_URL ??
+  'https://n8n.dian.solutions/webhook/nz8Ft7MMGiwmnonS/webhook/studio-vybe-intake';
 
 export async function POST(req: NextRequest) {
   let body: Record<string, unknown> = {};
