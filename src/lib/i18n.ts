@@ -27,6 +27,7 @@ export const dictionaries = {
         primary: 'Build it for me',
         secondary: 'Build it myself',
         comingSoon: 'coming soon',
+        bookCall: 'Book a call',
       },
     },
     problem: {
@@ -692,6 +693,7 @@ export const dictionaries = {
         primary: 'Für mich erstellen',
         secondary: 'Selbst erstellen',
         comingSoon: 'bald verfügbar',
+        bookCall: 'Termin buchen',
       },
     },
     problem: {
