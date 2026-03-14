@@ -13,11 +13,11 @@ const MUTED = '#8A8178';
  * If either is not set, the modal returns null.
  */
 
-const CAL_BASE = process.env.NEXT_PUBLIC_CAL_URL;
-const CAL_EVENT = process.env.NEXT_PUBLIC_CAL_EVENT;
+const CAL_BASE = process.env.NEXT_PUBLIC_CAL_URL ?? 'https://book.studio-vybe.com';
+const CAL_EVENT = process.env.NEXT_PUBLIC_CAL_EVENT ?? '/chris/check-in';
 
 // Export helper for other components to check if booking is available
-export const isBookingAvailable = Boolean(CAL_BASE && CAL_EVENT);
+export const isBookingAvailable = true;
 
 interface BookingModalProps {
   open: boolean;
