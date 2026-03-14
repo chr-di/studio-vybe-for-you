@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { Dictionary, Locale } from '@/lib/i18n';
 
 interface ApplyFormProps {
@@ -48,9 +49,9 @@ const ACCENT = '#2D2A26';
 
 export function ApplyForm({ dict, locale }: ApplyFormProps) {
   const f = dict.apply;
+  const router = useRouter();
   const [step, setStep] = useState(1);
   const [transitioning, setTransitioning] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -107,46 +108,20 @@ export function ApplyForm({ dict, locale }: ApplyFormProps) {
     setSubmitting(true);
     setError(null);
     try {
-      await fetch('/api/intake', {
+      const res = await fetch('/api/intake', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...data, locale, form: 'apply' }),
       });
-      setSubmitted(true);
+      if (!res.ok) throw new Error('Request failed');
+      router.push(
+        `/${locale}/thank-you/apply?name=${encodeURIComponent(data.name)}&email=${encodeURIComponent(data.email)}`
+      );
     } catch {
       setError(f.error);
-    } finally {
       setSubmitting(false);
     }
   };
-
-  if (submitted) {
-    return (
-      <main style={{ background: BG, color: TEXT }} className="min-h-screen flex items-center justify-center px-6">
-        <div className="max-w-lg w-full text-center py-24">
-          <p style={{ color: MUTED }} className="font-body text-sm tracking-widest uppercase mb-8">
-            {f.success.label}
-          </p>
-          <h1 className="font-display text-4xl md:text-5xl font-normal leading-tight mb-6">
-            {f.success.heading}
-          </h1>
-          <p style={{ color: MUTED }} className="font-body text-lg mb-12">
-            {f.success.body}
-          </p>
-          <a
-            href={`/${locale}/brief?name=${encodeURIComponent(data.name)}&email=${encodeURIComponent(data.email)}`}
-            style={{ background: TEXT, color: BG }}
-            className="inline-flex items-center gap-3 px-8 py-4 font-body font-medium text-base hover:opacity-90 transition-opacity"
-          >
-            {f.success.cta} <span>→</span>
-          </a>
-          <p style={{ color: MUTED }} className="font-body text-sm mt-12">
-            {f.success.fallback}
-          </p>
-        </div>
-      </main>
-    );
-  }
 
   return (
     <main style={{ background: BG, color: TEXT }} className="min-h-screen flex flex-col">

@@ -665,6 +665,13 @@ export const dictionaries = {
         body: "We'll review everything you've shared and be in touch within a few days. No need to follow up — we've got it.",
         sub: 'In the meantime, feel free to explore our work or reach out if anything changes.',
       },
+      apply: {
+        label: "You're on the list",
+        heading: "We'll be in touch within 24 hours.",
+        body: "Check your inbox — we've sent a confirmation. We'll reach out shortly to talk through the project.",
+        sub: "Want to give us a head start? You can complete the full brief in the meantime.",
+        briefCta: 'Complete the full brief →',
+      },
     },
   
   },
@@ -1322,6 +1329,13 @@ export const dictionaries = {
         heading: 'Ihr Briefing ist eingegangen.',
         body: 'Wir werden alles durchgehen und uns in den nächsten Tagen bei Ihnen melden. Sie müssen sich nicht melden — wir kümmern uns darum.',
         sub: 'In der Zwischenzeit können Sie gerne unsere Arbeiten anschauen oder uns kontaktieren, falls sich etwas ändert.',
+      },
+      apply: {
+        label: 'Sie sind dabei',
+        heading: 'Wir melden uns innerhalb von 24 Stunden.',
+        body: 'Prüfen Sie Ihren Posteingang — wir haben eine Bestätigung gesendet. Wir melden uns in Kürze, um das Projekt zu besprechen.',
+        sub: 'Möchten Sie uns einen Vorsprung geben? Sie können in der Zwischenzeit das vollständige Briefing ausfüllen.',
+        briefCta: 'Vollständiges Briefing ausfüllen →',
       },
     },
   
